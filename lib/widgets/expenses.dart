@@ -31,6 +31,8 @@ class _ExpensesState extends State<Expenses> {
 
   void _openAddExpenseOverlay() {
     showModalBottomSheet(
+      //This is a simple feature that makes sure we stay away from the divce features that might affect our UI
+      useSafeArea: true,
       isScrollControlled: true,
       context: context,
       builder: (ctx) => NewExpense(onAddExpense: _addExpense),
@@ -49,10 +51,10 @@ class _ExpensesState extends State<Expenses> {
     setState(() {
       _registeredExpenses.remove(expense);
     });
-    //This removes the older bar if a new expense is removed so a new bar can be displayed 
+    //This removes the older bar if a new expense is removed so a new bar can be displayed
     //instead of waiting for the old bar to be removed
     ScaffoldMessenger.of(context).clearSnackBars();
-    
+
     //This displays a bar at the bottom of the screen when an expense is removed
     //with some text and a button to undo the removal of the expense
     //This bar dissapears after three seconds if there is no interaction with the button
@@ -74,6 +76,8 @@ class _ExpensesState extends State<Expenses> {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+
     Widget mainContent = const Center(
       child: Text('No expenses found. Start adding some!'),
     );
@@ -96,12 +100,28 @@ class _ExpensesState extends State<Expenses> {
           )
         ],
       ),
-      body: Column(
-        children: [
-          Chart(expenses: _registeredExpenses),
-          Expanded(child: mainContent,),
-        ],
-      ),
+      //Ternary expression to check if the device is upright or rotated
+      body: width < 600
+          ? Column(
+              children: [
+                Chart(expenses: _registeredExpenses),
+                Expanded(
+                  child: mainContent,
+                ),
+              ],
+            )
+          : Row(
+              children: [
+                //This constraints the child to only take as much 
+                //width as available in the Row after the sizing of the other row children
+                Expanded(
+                  child: Chart(expenses: _registeredExpenses),
+                ),
+                Expanded(
+                  child: mainContent,
+                ),
+              ],
+            ),
     );
   }
 }
